@@ -1,0 +1,32 @@
+---
+layout: page
+title: Comp Sci / AI
+permalink: /csai/
+---
+
+## Computer Science
+<ul>
+{% for post in site.posts %}
+	{% if post.cs == 1 and post.publish == 1%}
+	<li>
+		<a href="{{ post.url | prepend: site.baseurl}}">{{ post.title }}</a>
+	</li>
+	{% endif %}
+{% endfor %}
+</ul>
+
+
+## Artificial Intelligence
+
+* Variational Autoencoders (coming soon)
+* DCGANs for Generating Realistic Faces (coming soon)
+* Visualizing DCGANs (coming soon)
+<ul>
+{% for post in site.posts %}
+	{% if post.ai == 1 and post.publish == 1 %}
+	<li>
+		<a href="{{ post.url | prepend: site.baseurl}}">{{ post.title }}</a>
+	</li>
+	{% endif %}
+{% endfor %}
+</ul>
