@@ -1,0 +1,157 @@
+---
+layout: post
+title:  "Welcome to Calculus A Tutorial!"
+date:   2015-08-25 00:00:00
+img: gmplogo2.png
+description: GMP is a free library for arbitrary precision arithmetic, extremely useful for cryptography applications and research, Internet security applications, etc. In order to use this highly efficient library, one must code in C/C++. This is a Java port
+
+cs: 0
+ai: 0
+math: 0
+teaching: 1
+publish: 0
+---
+[GitHub Project](https://github.com/mathybit/java-gmp)
+
+GMP is a free library for arbitrary precision arithmetic, extremely useful for cryptography applications and research, Internet security applications, etc. In order to use this highly efficient library, one must code in C/C++. This is a Java port for fellow Java developers who dislike thinking about pointers.
+
+I am providing some base code that any developer can build upon to link desired functions from libgmp and call them within Java classes. The code uses JNA technology, a much more elegant alternative to JNI (the latter requires Java developers to write C code...).
+
+My Java code borrows heavily and shamelessly from the [jna-gmp project on GitHub](https://github.com/square/jna-gmp). I cleaned it up a bit to make it more obvious how to enable additional functionality, and added more useful functions for integer arithmetic that are commonly used in cryptography.
+
+Using my code on a Linux system is easy, as compiling libgmp is pretty straightforward. However, I ran into issues when trying to compile the library on Windows using Cygwin. Here I describe the process of compiling and using libgmp within Java on a Windows platform.
+
+
+
+## Requirements
+
+You will need the following:
+* Cygwin installation on Windows ([https://cygwin.com/](https://cygwin.com/))
+* libgmp source code ([https://gmplib.org/](https://gmplib.org/))
+* msvcrt.dll (your system may already have this)
+* Java Native Access Library ([java-native-access](https://github.com/java-native-access/))
+
+
+
+## Compiling libgmp on Windows
+
+For the compilation, I used the Cygwin environment (32-bit version) on Windows 10. Simply install all the dev tools available in Cygwin. It may work just as well with the 64-bit version, but I haven't tested it.
+
+The main issue with compiling libgmp using Cygwin's GCC is that the dll library generated is dependent on cygwin1.dll. However, cygwin1.dll cannot be dynamically loaded as it expects to have access to the 4K bytes at the bottom of the stack when initializing. This causes an `EXCEPTION_ACCESS_VIOLATION` at runtime. 
+
+Older versions of GCC used to allow the "-mno-cygwin" flag to circumvent this issue, but this is now obsolete (it dates back to GCC 3.x). After a lot of searching on the web, the consensus seems to be that it is impossible to load cygwin1.dll using JNA (Java Native Access), so that prevents us from loading any dll file that was compiled with Cygwin's GCC. 
+
+There is a workaround: use the mingw compiler that comes with Cygwin instead. This will ensure the generated dll is dependent on Microsoft's msvcrt.dll library, rather than the cygwin one. Here are the correct compilation steps:
+{% highlight shell %}
+./configure --disable-static --enable-shared --host=x86_64-w64-mingw32
+{% endhighlight %}
+followed by
+{% highlight shell %}
+make
+{% endhighlight %}
+
+This will generate libgmp-10.dll in the .libs subfolder. The configure script generates a static library by default, so you need the `--disable-static --enable-shared` config options ensure that you get a .dll file as output, and the `--host=x86_64-w64-mingw32` ensures that you use the mingw compiler, avoiding the troublesome cygwin1.dll dependency.
+
+This workaround solves any general dependency issues for anything compiled under Cygwin, not just libgmp. Your resulting .dll files can now be loaded, and they will depend on msvcrt.dll instead.
+
+
+
+## Adding extra functions
+
+The first step for adding new functionality is to create the appropriate method in LibGMP.java. For example, to use the integer multiplication
+`void mpz_mul (mpz_t rop, const mpz_t op1, const mpz_t op2)`, you would add the following line of code to LibGMP.java:
+{% highlight java %}
+public static native void __gmpz_mul(mpz_t rop, mpz_t op1, mpz_t op2);
+{% endhighlight %}
+
+Next up is editing GMP.java, the actual class we will be using to safely call libgmp functions in our Java code. First we add the import of the function we just created above:
+{% highlight java %}
+import static pca.cs.jna.gmp.LibGMP.__gmpz_mul;
+{% endhighlight %}
+
+Then we create two methods:
+{% highlight java %}
+public static BigInteger multiply(BigInteger a, BigInteger b) { ... }
+private BigInteger multiplyImpl(BigInteger a, BigInteger b) { ... }
+{% endhighlight %}
+
+The first static method is visible to us, and simply calls the second one through an instance of the GMP class that is automatically created at runtime (the static code at the top of GMP.java does this for you, no need to worry about it).
+
+The private Impl method is where each function will differ. Because there needs to be a conversion between Java's BigInteger type and the C mpz_t type, you need to make sure you allocate enough bits for the result when translating back into BigInteger. When in doubt, add more bits (unless you want a memory efficient app, then you need to be more careful). The Impl method also contains the actual call to the GMP library.
+
+For integer multiplication, if you want to multiply two integers of $$a$$ and $$b$$ bits long, the result will be at most
+\$$
+(2^a - 1)(2^b - 1) = 2^{a+b} - 2^a - 2^b + 1 \leq 2^{a+b} - 1
+\$$
+so we need at most $$a+b$$ bits to store it. This is reflected in the code for `multiplyImpl()`:
+{% highlight java %}
+int requiredSize = a.bitLength() + b.bitLength();
+{% endhighlight %}
+
+With all this in place, you are ready to call the function: simply do `GMP.multiply(a,b)` where a,b are of BigInteger type. The method returns a BigInteger.
+
+
+
+## Correct .dll and .jar location
+
+You need to specify where libgmp-10.dll is located at runtime. To do this, set up your project run configuration to include the -D JVM parameter
+`-Djna.library.path="C:\dev\lib\dll"` (on my dev environment, I keep all my .dll files in C:\dev\lib\dll but you may modify that as you wish). 
+
+You will also need to have jna.jar and win32-x86-64.jar (these come with JNA) in your build path (and at runtime). If you're using Eclipse, all of this can be changed under *Project Properties* (add jars to build path, and modify the runtime configuration for loading the dll).
+
+
+
+## Testing
+
+* `Test.java` runs some very basic arithmetic operations on two BigIntegers. Run it to see if you get the expected results (and no errors). Also this is a good example of how you should call the GMP class. I get the following output:
+{% highlight shell %}
+18 + 60 = 78
+18 - 60 = -42
+60 - 18 = 42
+18 * 60 = 1080
+60 / 18 = 3
+60 % 18 = 6
+18 / 60 = 0
+18 % 60 = 18
+gcd(18, 60) = 6
+{% endhighlight %}
+
+* `TestPerformance.java` compares computation time between Java's BigInteger functions and GMP. Notice that simple arithmetic operations are more efficient in Java, probably due to the overhead necessary to call GMP. However, number theoretic functions and group operations are executed significantly faster via the native GMP call. Here's an output sample on my system:
+
+{% highlight shell %}
+Addition operation (50000 times):
+   128 bits | Java: 5.449 ms | GMP: 336.1 ms
+   256 bits | Java: 4.642 ms | GMP: 115.9 ms
+   512 bits | Java: 4.020 ms | GMP: 127.8 ms
+   1024 bits | Java: 7.205 ms | GMP: 161.3 ms
+   2048 bits | Java: 6.286 ms | GMP: 290.1 ms
+Done.
+Multiplication operation (50000 times):
+   128 bits | Java: 6.514 ms | GMP: 104.2 ms
+   256 bits | Java: 4.228 ms | GMP: 109.5 ms
+   512 bits | Java: 6.619 ms | GMP: 136.6 ms
+   1024 bits | Java: 23.17 ms | GMP: 197.8 ms
+   2048 bits | Java: 72.55 ms | GMP: 324.7 ms
+Done.
+Group operation a^e mod n (20000 times):
+   128 bits | Java: 140.7 ms | GMP (insecure): 56.06 ms | GMP (secure): 86.58 ms
+   256 bits | Java: 167.2 ms | GMP (insecure): 81.24 ms | GMP (secure): 132.2 ms
+   512 bits | Java: 345.9 ms | GMP (insecure): 164.3 ms | GMP (secure): 294.8 ms
+   1024 bits | Java: 1.173 s | GMP (insecure): 391.9 ms | GMP (secure): 828.9 ms
+   2048 bits | Java: 4.420 s | GMP (insecure): 1.410 s | GMP (secure): 3.041 s
+Done.
+Group operation a^{-1} mod n (10000 times):
+   128 bits | Java: 117.7 ms | GMP: 28.23 ms
+   256 bits | Java: 207.4 ms | GMP: 31.99 ms
+   512 bits | Java: 410.9 ms | GMP: 46.91 ms
+   1024 bits | Java: 1.388 s | GMP: 78.92 ms
+   2048 bits | Java: 4.404 s | GMP: 148.7 ms
+Done.
+Primality testing:
+   128 bits | Java: 15.93 ms | GMP: 736.4 ?s
+   256 bits | Java: 41.58 ms | GMP: 2.066 ms
+   512 bits | Java: 274.7 ms | GMP: 14.83 ms
+   1024 bits | Java: 2.927 s | GMP: 188.6 ms
+   2048 bits | Java: 31.42 s | GMP: 1.574 s
+Done.
+{% endhighlight %}
