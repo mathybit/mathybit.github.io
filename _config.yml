@@ -9,7 +9,9 @@ permalink: ':title/'
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://mathybit.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 
+google-analytics: "UA-124634802-1"
 textlogo: logo1.png
+
 
 # Social Media
 #
@@ -28,7 +30,7 @@ email: writetoadriano@gmail.com
 
 # Comments
 #
-discus-identifier: # Add your Disqus identifier
+#discus-identifier: # Add your Disqus identifier
 
 
 # Paginate
