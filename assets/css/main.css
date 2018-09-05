@@ -590,7 +590,7 @@ template {
 
 /* Name.Label */
 .highlight .nn {
-  color: #0cf;
+  color: #00a4cc; /*#0cf; was too light*/
 }
 
 /* Name.Namespace */
@@ -770,9 +770,10 @@ blockquote {
 }
 
 .highlight {
-  background-color: #faf9f9;
-  border-radius: 3px;
+  background-color: #e8e8e8; /*#faf9f9;*/
+  border-radius: 1px; /* 3px; */
   margin: 0;
+  font-size: 0.8rem; /* Font was too big, I make it smaller than content text */
 }
 
 .highlighter-rouge {
@@ -926,18 +927,42 @@ img.post-image, img.page-img {
   width: 100%;
 }
 
+/* This allows us to include images with floating text around them */
 img.image-left {
   display: block;
   margin-left: auto;
   margin-right: auto;
   float: right;
 }
-
 img.image-right {
   display: block;
   margin-left: auto;
   margin-right: auto;
   float: left;
+}
+img.image-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* This allows us to include tables containing images and other elements with caption */
+table.table-left {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  float: right;
+}
+table.table-right {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  float: left;
+}
+table.table-center {
+  /*display: block;*/
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .page-content {
