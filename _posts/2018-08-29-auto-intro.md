@@ -234,7 +234,7 @@ This clustering issue becomes even more apparent in 3D:
 
 | ![k_auto0_kerpca3d-all.png](../assets/img/k_auto0_kerpca3d-all.png){:width="100%"} |
 |:--:|
-| *Figure 5: KernelPCA on encodings (3-dim)* |
+| *Figure 6: KernelPCA on encodings (3-dim)* |
 {:class="table-center"}
 
 
@@ -244,11 +244,11 @@ This clustering issue becomes even more apparent in 3D:
 
 ## Convolutional autoencoders
 
-One way to modify our dense autoencoder is to use convolutional layers. This is especially common for image data. *Figure 6* shows a hybrid between a purely convolutional autoencoder, with added fully-connected layers which make the model more powerful.
+One way to modify our dense autoencoder is to use convolutional layers. This is especially common for image data. *Figure 7* shows a hybrid between a purely convolutional autoencoder, with added fully-connected layers which make the model more powerful.
 
 | ![k_auto_conv1.png](../assets/img/k_auto_conv1.png){:width="90%"} |
 |:--:|
-| *Figure 6: Convolutional autoencoder architecture* |
+| *Figure 7: Convolutional autoencoder architecture* |
 {:class="table-center"}
 
 
@@ -342,10 +342,10 @@ model.compile(loss='mean_squared_error', optimizer=optimizer)
 
 | ![k_auto_conv1_rec.gif](../assets/img/k_auto_conv1_rec.gif){:width="90%"} |
 |:--:|
-| *Figure 7: Reconstruction progress* |
+| *Figure 8: Reconstruction progress* |
 {:class="table-left"}
 
-During training, the convolutional model learns significantly faster, with reconstructions looking good after 10 epochs. The gif in *Figure 7* shows reconstruction progress while training for only 5 epochs.
+During training, the convolutional model learns significantly faster, with reconstructions looking good after 10 epochs. The gif in *Figure 8* shows reconstruction progress while training for only 5 epochs.
 
 However, it is not perfect. Notice the digit 9 is reconstructed as a 7. Some fine-tuning is needed to improve performance here (such as modifying the kernel sizes for the convolutional layers, or adding extra filters to allow the model to learn finer details).
 
@@ -353,7 +353,7 @@ The model performs worse than our dense autoencoder for digit generation:
 
 | ![k_auto_conv1-gen.png](../assets/img/k_auto_conv1-gen.png) |
 |:--:|
-| *Figure 8: Generating digits* |
+| *Figure 9: Generating digits* |
 {:class="table-center"}
 
 
@@ -361,7 +361,7 @@ Performing KernelPCA reveals the same clustering issue that our dense autoencode
 
 | ![k_auto_conv1_kerpca3d-all.png](../assets/img/k_auto_conv1_kerpca3d-all.png){:width="100%"} |
 |:--:|
-| *Figure 9: KernelPCA on encodings (3-dim)* |
+| *Figure 10: KernelPCA on encodings (3-dim)* |
 {:class="table-center"}
 
 
