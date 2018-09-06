@@ -294,9 +294,7 @@ Next is the decoder model. For increasing image resolution, it is also possible 
 {% highlight python %}
 decoder = Sequential(name="decoder")
 
-decoder.add(Dense(input_shape=(n_codings, ), units=120, name='codings_in'))
-decoder.add(Activation('relu'))
-decoder.add(Dense(units=320))
+decoder.add(Dense(input_shape=(n_codings, ), units=320, name='codings_in'))
 decoder.add(Activation('relu'))
 
 h0 = encoder.layers[-6].output_shape[1]
