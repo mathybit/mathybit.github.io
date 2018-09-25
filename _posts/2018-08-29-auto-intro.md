@@ -217,7 +217,7 @@ It is rare for regular autoencoders to be able to generate data that resembles t
 | *Figure 4: Encoding coordinate distributions* |
 {:class="table-center" width="80%"}
 
-The distributions of the encoded coordinates are quite different different. It's no surprise that feeding in normally distributed encodings doesn't produce high quality images. 
+The distributions of the encoded coordinates are quite different. It's no surprise that feeding in normally distributed encodings doesn't produce high quality images. 
 
 
 | ![k_auto0_kerpca2d-all.png](../assets/img/k_auto0_kerpca2d-all.png){:width="100%"} |

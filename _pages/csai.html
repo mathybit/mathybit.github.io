@@ -6,7 +6,7 @@ permalink: /csai/
 
 ## Computer Science
 <ul>
-{% for post in site.posts %}
+{% for post in site.posts reversed %}
 	{% if post.cs == 1 and post.publish == 1%}
 	<li>
 		<a href="{{ post.url | prepend: site.baseurl}}">{{ post.title }}</a>
@@ -19,13 +19,12 @@ permalink: /csai/
 ## Artificial Intelligence
 
 <ul>
-{% for post in site.posts %}
+{% for post in site.posts reversed %}
 	{% if post.ai == 1 and post.publish == 1 %}
 	<li>
 		<a href="{{ post.url | prepend: site.baseurl}}">{{ post.title }}</a>
 	</li>
 	{% endif %}
 {% endfor %}
-	<li>Variational Autoencoders (coming soon)</li>
-	<li>DCGANs for Generating Realistic Faces (coming soon)</li>
+	<li>Generative Adversarial Networks For Realistic Facial Images (coming soon)</li>
 	<li>Visualizing DCGANs (coming soon)</li>
