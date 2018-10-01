@@ -4,7 +4,34 @@ layout: default
 <article class="page-article">
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
-      TeX: { equationNumbers: { autoNumber: "AMS" } }
+		TeX: {
+			equationNumbers: { autoNumber: "AMS" },
+			Macros: {
+				sta: ["{ {#1} \\brack {#2} }", 2], //stirling numbers of the first kind
+				stb: ["{ {#1} \\brace {#2} }", 2], //stirling numbers of the second kind
+				stc: ["{ {#1} \\choose {#2} }", 2], //binomial coefficients
+				pr:  ["{ \\left( #1 \\right) }", 1], // ()
+				pra: ["{ \\left< #1 \\right> }", 1], // <>
+				prb: ["{ \\left[ #1 \\right] }", 1], // []
+				prc: ["{ \\left\\{ #1 \\right\\} }", 1], // {}
+				prabs: ["{ \\left| #1 \\right| }", 1], // ||
+				N: "{ \\mathbb{N} }",
+				Z: "{ \\mathbb{Z} }",
+				Q: "{ \\mathbb{Q} }",
+				R: "{ \\mathbb{R} }",
+				C: "{ \\mathbb{C} }",
+				enc: "{ \\mathrm{Enc} }",
+				dec: "{ \\mathrm{Dec} }",
+				inv: "{ ^{-1} }", //inverse
+				grad: "{  \\vec\\nabla  }", //gradient operator
+				tr: "{ ^\\intercal }", //matrix transpose
+				comp: "{ ^\\mathsf{C} }", //matrix complement
+				md: ["{  \\text{ (mod}\\text{ }{#1}\\text{)}  }", 1], //notation for (mod n)
+				zmod: ["{  \\mathbb{Z}/{#1}\\mathbb{Z}  }", 1], //notation for Z/nZ
+				zmods: ["{  \\left(\\mathbb{Z}/{#1}\\mathbb{Z}\\right)^\\times  }", 1] //notation for (Z/nZ)^x
+			}
+		}
+	  
     });
   </script>
   <div class="wrap-content">
