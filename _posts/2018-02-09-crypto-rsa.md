@@ -29,7 +29,7 @@ Asymmetric (public-key) cryptography relies heavily on number theoretic function
 | *Figure 1: Principle of symmetric-key encryption* |
 {:class="table-center" width="65%"}
 
-This means that if Alice and Bob want to communicate using private-key encryption, they must find a way to establish the secret key over a secure channel first. This is known as the *key distribution problem*. Furthermore, the number of keys can become quite large: if we require each pair of users to have a separate pair of keys, a network with $$n$$ users would need
+This means that if Alice and Bob want to communicate using private-key encryption, they must find a way to establish the secret key over a secure channel first. This is known as the *key distribution problem*. Furthermore, the number of keys can become large fast: if we require each pair of users to have a separate pair of keys, a network with $$n$$ users would need a total of
 \$$
 \stc{n}{2} = \frac{n\cdot(n-1)}{2}
 \$$
@@ -49,27 +49,29 @@ The mathematics behind RSA can be elegantly stated in the language of *group the
 **Theorem** (Fermat's Little Theorem, 1640) 
 Suppose $$p$$ is prime and $$a$$ is any integer. Then 
 \$$
-a^p \equiv a \md p
+a^p \equiv a \md p.
 \$$
 
-This was first proved by Euler about a hundred years later, in 1736. Euler continued exploring the topic, and eventually proovided the following generalization:
+This was first proved by Euler about a hundred years later, in 1736. Euler continued exploring the topic, and eventually provided the following generalization:
 
 **Theorem** (Euler's Theorem, 1763) Suppose $$a$$ and $$n$$ are coprime positive integers. Then
 \$$
-a^{\phi(n)} \equiv 1 \md n
+a^{\phi(n)} \equiv 1 \md n.
 \$$
 
 Here $$\phi(n)$$ is *Euler's totient function*, which is defined as
 \$$
-\phi(n) = \text{# of positive integers less than $n$ that are relatively prime to $n$}
+\phi(n) = \text{# of positive integers less than $n$ that are relatively prime to $n$}.
 \$$
 
-We will explore some properties of $$\phi$$ in the mathy bit section. For implementing RSA, we need to know the following:
-* for any prime $$p$$, we have $$\phi(p) = p-1$$
+We provide proofs for these theorems in [the mathy bit section](#the-mathy-bit). For implementing RSA, we need to know the following properties of $$\phi$$:
+* for any prime $$p$$, we have $$\phi(p) = p-1$$, and
 * for distinct primes $$p$$ and $$q$$, 
 \$$
-\phi(pq) = \phi(p) \phi(q) = (p-1)(q-1).
+\phi(pq) = \phi(p) \phi(q) = (p-1)(q-1),
 \$$
+
+both of which can be easily derived using a counting argument.
 
 
 
@@ -87,28 +89,28 @@ There are three main steps involved in RSA encryption:
 
 Choose $$p$$ and $$q$$ to be two distinct (and large) primes, and compute
 \$$
-n = pq \quad \text{and} \quad \phi = \phi(n) = (p-1)(q-1)
+n = pq \quad \text{and} \quad \phi = \phi(n) = (p-1)(q-1).
 \$$
 
 To construct the public key, find any element $$1 < e < \phi(n)$$ that is coprime to $$\phi$$, so that $$e$$ is an element of the group $$\zmods{\phi}$$. The public key is the pair $$(n, e)$$. 
 
 To find the secret key, take the inverse of $$e$$ in the group $$\zmods{\phi}$$, i.e.
 \$$
-d = e\inv \md \phi
+d = e\inv \md \phi.
 \$$
 
-Notice how computing the secret key $$d$$ would be impossible if we didn't require $$\gcd(e, \phi) = 1$$ (this condition is necessary for $$e$$ to be invertible modulo $$\phi$$.
+Notice how computing the secret key $$d$$ would be impossible if we didn't require $$\gcd(e, \phi) = 1$$, a necessary condition in order for $$e$$ to be invertible modulo $$\phi$$.
 
 
 
 ### Encryption
 
-Suppose Alice wants to encrypt a message $$m$$ and send the ciphertext $$c = \enc(m)$$ to Bob. He generates a $$(PK, SK)$$ pair and provides Alice with the $$PK = (n, e)$$, which she uses to encrypt $$m$$ as follows:
+Suppose Alice wants to encrypt a message $$m$$ and send the ciphertext $$c = \enc(m)$$ to Bob. Bob first generates a $$(PK, SK)$$ pair and provides Alice with the $$PK = (n, e)$$, which she uses to encrypt $$m$$ via
 \$$
-\enc(m) = m^e \mod n = c
+\enc(m) = m^e \mod n = c.
 \$$
 
-The key Alice uses *does not need to be secret*. Bob can provide this over an insecure channel.
+The key Alice uses *does not need to be secret*. Bob can provide this information over an insecure channel.
 
 
 
@@ -116,7 +118,7 @@ The key Alice uses *does not need to be secret*. Bob can provide this over an in
 
 Bob receives the ciphertext $$c$$ back from Alice, and uses his matching secret key $$d$$ to retrieve the plain text:
 \$$
-\dec(c) = c^d \mod n = m
+\dec(c) = c^d \mod n = m.
 \$$
 
 Notice how, although Bob can reveal $$(n, e)$$, he never reveals $$\phi(n)$$. Doing so would make it very easy to compute his secret key $$d$$ by inverting $$e$$.
@@ -131,7 +133,7 @@ Notice how, although Bob can reveal $$(n, e)$$, he never reveals $$\phi(n)$$. Do
 
 ### Java (BigInteger)
 
-Java's `java.math.BigInteger` class provides all the methods necessary for implementing unpadded RSA. To initialize the values for $$p$$ and $$q$$, one needs an instance of `java.util.Random`, then use the appropriate constructor. Here are the necessary imports:
+Java's `java.math.BigInteger` class provides all the methods necessary for implementing unpadded RSA. To initialize the values for $$p$$ and $$q$$, one needs an instance of `java.util.Random`, then use the appropriate BigInteger constructor. Here are the necessary imports:
 
 {% highlight java %}
 import java.math.BigInteger;
@@ -164,16 +166,16 @@ BigInteger phi = (p.subtract(ONE)).multiply(q.subtract(ONE));
 
 Notice how we made $$p$$ and $$q$$ to be 64 bits each. This is to ensure that $$n$$ is 128-bit. In general, if we multiply an $$a$$-bit integer to a $$b$$-bit integer, the upper bound for the product is
 \$$
-(2^a - 1)(2^b - 1) = 2^{a+b} - 2^a - 2^b + 1 \leq 2^{a+b} - 1
+(2^a - 1)(2^b - 1) = 2^{a+b} - 2^a - 2^b + 1 \leq 2^{a+b} - 1,
 \$$
 so it would require at most $$a+b$$ bits.
 
-If we take a look at [the documentation for the BigInteger class](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html){:target="_blank"}, we see that the `certainty` parameter influences the probability that the generated primes are actually prime. In particular, the generated $$p$$ and $$q$$ are prime with probability
+If we take a look at [the documentation for the BigInteger class](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html){:target="_blank"}, we see that the `certainty` parameter influences the probability that the generated numbers are actually prime. In particular, the generated $$p$$ and $$q$$ are prime with probability
 \$$
 1 - \frac{1}{2^\text{certainty}}
 \$$
 
-Because of the sheer size of the integers involved, it is computationally infeasible to actually try to factor $$p$$ and $$q$$ in order to ensure with 100% certainty that they are really prime. Instead, some variation of the *Miller–Rabin primality test* is used to verify that a randomly chosen BigInteger is prime with some probability. 
+Because of the sheer size of the integers involved, it is computationally infeasible to actually try to factor $$p$$ and $$q$$ in order to ensure with 100% certainty that they are prime. Instead, some variation of the *Miller–Rabin primality test* is used to verify that these randomly chosen BigInteger are prime with some probability.
 
 For example, a certainty value of 4 would yield a prime with 93.75% probability (very bad!). The primality test is not very expensive computationally, so we picked a default value of 20. However, for production-level security we would use something larger in the 50-100 range.
 
@@ -184,7 +186,7 @@ Since we want the public key $$e$$ to be in the group $$\zmods{\phi}$$, we gener
 * `phi.bitCount()`, which returns the number of bits in the two's complement representation of $$\phi$$ that differ from its sign bit.
 * `phi.bitLength()`, which returns *the number of bits in the minimal two's-complement representation* of $$\phi$$, excluding a sign bit.
 
-We want the second one:
+We want the second function. In the implementation, we actually have $$e$$ occupy one bit less than $$\phi$$, in the hopes to gain some speed and ensure we are inside the group. However, this is not the most secure approach.
 
 {% highlight java %}
 BigInteger e = new BigInteger(phi.bitLength(), r);
