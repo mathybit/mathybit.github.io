@@ -471,7 +471,7 @@ which implies $$a^{\phi(n)} = e$$, so $$a^{\phi(n)} \equiv 1 \md n$$.
 
 ## Security of RSA
 
-If the numbers $$e, n$$ are both very large, the ciphertext $$c = m^e$$ appears random and unrelated to $$m$$. However, RSA is deterministic (in the sense that encrypting the same $$m$$ always gives the same ciphertext), which makes would allow an attacker to build a dictionary. There are other encryption schemes where this is not the case - we will discuss El Gamal encryption in a future post.
+If the numbers $$e, n$$ are both very large, the ciphertext $$c = m^e$$ appears random and unrelated to $$m$$. However, RSA is deterministic (in the sense that encrypting the same $$m$$ always gives the same ciphertext), which makes would allow an attacker to build a dictionary. There are other encryption schemes where this is not the case.
 
 Another way an attacker can break RSA is to successfully factor $$n$$ as $$p\cdot q$$. Currently there is no known algorithm that can do this in polynomial time for large numbers (bigger than $$10^{100}$$). The best known general algorithm to date is the *General Number Field Sieve*, whose complexity is
 \$$
@@ -482,7 +482,7 @@ for a number that is $$b$$ bits large. This algorithm is super-polynomial but st
 
 In cryptography, there are formal definitions for *correctness*. We also have formal definitions for *semantic security* (which measures the knowledge gain from a ciphertext with background knowledge) and *ciphertext indistinguishability* (which does not take into account background knowledge when measuring the gain from) - they are equivalent.
 
-While going into the details is beyond the scope of this article, it is worth noting that that deterministic algorithms like RSA are not semantically secure. Even though $$n$$ cannot be factored in polynomial time, encrypting the message space using the public key is takes polynomial time. Furthermore, unpadded RSA is not indistinguishable against eavesdropping attacks. 
+While going into the details is beyond the scope of this article, it is worth noting that deterministic algorithms like RSA are not semantically secure. Even though $$n$$ cannot be factored in polynomial time, encrypting the message space using the public key is doable in polynomial time. Furthermore, unpadded RSA is not indistinguishable against eavesdropping attacks. 
 
 
 This issue does not exist for probabilistic encryption schemes like ElGamal, which we will discuss in a future article.
