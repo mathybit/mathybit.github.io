@@ -381,11 +381,9 @@ Now that we have these prerequisites, let's show that RSA is correct.
 
 ### Correctness of RSA
 
-The ciphertext is given by $$c = m^e \mod n$$. To see why the decryption algorithm recovers the message $$m$$, recall that $$d \equiv e\inv \md{\phi(n)}$$, so $$de = 1 \md{\phi(n)}$$ and we may write $$de = 1 + k \phi(n)$$ for some integer $$k$$.
-
-The decryption algorithm then gives
+The ciphertext is given by $$c = m^e \mod n$$. To see why the decryption algorithm recovers the message $$m$$, recall that $$d \equiv e\inv \md{\phi(n)}$$. In other words, $$de \equiv 1 \md{\phi(n)}$$ and we may write $$de = 1 + k \phi(n)$$ for some integer $$k$$. The decryption algorithm then gives
 \$$
-c^d \equiv (m^e)^d = m^{ed} = m^{1+k\phi(n)} = m \cdot (m^{\phi(n)})^k \md n
+c^d \equiv (m^e)^d = m^{ed} = m^{1+k\phi(n)} = m \cdot (m^{\phi(n)})^k \md n,
 \$$
 
 and if $$\gcd(m, n) = 1$$, Euler's theorem immediately gives the desired result, and RSA is correct for any message in the group $$\zmods{n}$$. But what if we want to work with the entire group $$\zmod{n}$$? After all, the original RSA paper doesn't say anything about restricting the message space to elements coprime to $$n$$.
@@ -410,12 +408,12 @@ m \equiv 0 \md q
 \end{cases}
 \$$
 
-Looking at $$m^{ed}$$, let's that it maps to the same system under our ring isomorphism. First, $$m^{ed}$$ reduces to 0 modulo $$q$$. What about modulo $$p$$? First, notice that
+Looking at $$m^{ed}$$, let's show that it maps to the same system under our ring isomorphism. First, $$m^{ed}$$ reduces to 0 modulo $$q$$. What about modulo $$p$$? Notice that
 \$$
 m^{ed} \equiv a_p^{ed} \md p
 \$$
 
-where $$a_p$$ is nonzero, and thus relatively prime to $$p$$. Write $$de = 1 + k(p-1)(q-1)$$, which is congruent to $$1$$ modulo $$\phi(p) = p-1$$, which is the order of the group $$\zmod p$$. Then, by Lemma 3, we have
+where $$a_p$$ is nonzero, and thus relatively prime to $$p$$. Write $$de = 1 + k(p-1)(q-1)$$, which is congruent to $$1$$ modulo $$\phi(p) = p-1$$, which is the order of the group $$\zmod p$$. Invoking Lemma 3, we have
 \$$
 m^{ed} \equiv a_p^{ed} \equiv a^{ed \mod \phi(p)} \equiv a_p^1 = a_p \md p
 \$$
@@ -453,7 +451,7 @@ Suppose $$a$$ and $$n$$ are coprime positive integers. Then
 a^{\phi(n)} \equiv 1 \md n
 \$$
 
-*Proof.* As in the FLT proof, we work inside $$\zmod n$$, and since $$\gcd(a, n) = 1$$, we actually have $$a in \zmods n$$, a multiplicative group of order $$\phi(n)$$. The result follows immediately from Lemma 3.
+*Proof.* As in the FLT proof, we work inside $$\zmod n$$, and since $$\gcd(a, n) = 1$$, we actually have $$a \in \zmods n$$, a multiplicative group of order $$\phi(n)$$. The result follows immediately from Lemma 3.
 
 An alternate way to see this, without making use of Lemma 3, is to enumerate all the elements of the group $$G = \zmods n$$:
 \$$
@@ -465,7 +463,7 @@ Taking $$aG = \prc{ax_1, ax_2, \dots, ax_{\phi(n)}}$$ has the effect of permutin
 \prod_{i=1}^{\phi(n)} x_i = \prod_{i=1}^{\phi(n)} ax_i = a^{\phi(n)}\prod_{i=1}^{\phi(n)} x_i
 \$$
 
-which implies $$a^{\phi(n)} = e$$, so $$a^{\phi(n)} \equiv 1 \md n$$.
+which implies $$a^{\phi(n)}$$ is the identity element in $$G$$.
 
 
 
@@ -473,18 +471,18 @@ which implies $$a^{\phi(n)} = e$$, so $$a^{\phi(n)} \equiv 1 \md n$$.
 
 ## Security of RSA
 
-If the numbers $$e, n$$ are both very large, the ciphertext $$c = m^e$$ appears random and unrelated to $$m$$. However, RSA is deterministic (in the sense that encrypting the same $$m$$ always gives the same ciphertext), which makes would allow an attacker to build a dictionary. There are other encryption schemes where this is not the case.
+If the numbers $$e, n$$ are both very large, the ciphertext $$c = m^e$$ appears random and unrelated to $$m$$. However, RSA is deterministic (in the sense that encrypting the same $$m$$ always gives the same ciphertext), which allows an attacker to build a dictionary. There are other encryption schemes where this is not the case.
 
 Another way an attacker can break RSA is to successfully factor $$n$$ as $$p\cdot q$$. Currently there is no known algorithm that can do this in polynomial time for large numbers (bigger than $$10^{100}$$). The best known general algorithm to date is the *General Number Field Sieve*, whose complexity is
 \$$
 \exp\pr{\pr{\sqrt[3]{\frac{64}{9}} + o(1)} b^{1/3} \pr{\ln b}^{2/3}}
 \$$
 
-for a number that is $$b$$ bits large. This algorithm is super-polynomial but still sub-exponential.
+for a number that is $$b$$ bits large. This algorithm is sub-exponential, but still super-polynomial.
 
-In cryptography, there are formal definitions for *correctness*. We also have formal definitions for *semantic security* (which measures the knowledge gain from a ciphertext with background knowledge) and *ciphertext indistinguishability* (which does not take into account background knowledge when measuring the gain from) - they are equivalent.
+In cryptography, there are formal definitions for *correctness*. We also have precise notions of *semantic security* (a way to measure the knowledge gain from a ciphertext when considering background knowledge) and *ciphertext indistinguishability* (which does not take into account background knowledge when measuring gain). It turns out the last two are equivalent.
 
-While going into the details is beyond the scope of this article, it is worth noting that deterministic algorithms like RSA are not semantically secure. Even though $$n$$ cannot be factored in polynomial time, encrypting the message space using the public key is doable in polynomial time. Furthermore, unpadded RSA is not indistinguishable against eavesdropping attacks. 
+While going into the details is beyond the scope of this article, it is worth mentioning that deterministic algorithms like RSA are not semantically secure. Even though $$n$$ cannot be factored in polynomial time, encrypting the message space using the public key is doable in polynomial time. Furthermore, unpadded RSA is not indistinguishable against eavesdropping attacks. 
 
 
 This issue does not exist for probabilistic encryption schemes like ElGamal, which we will discuss in a future article.
