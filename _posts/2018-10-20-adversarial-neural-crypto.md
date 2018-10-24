@@ -3,7 +3,7 @@ layout: post
 title:  "Adversarial Neural Cryptography"
 date:   2018-10-20 00:00:00
 img: crypto_adv_logo.png
-description: In 2016, researchers from Google Brain published a paper showing how neural networks can learn symmetric encryption to protect information from other AI adversaries 
+description: In 2016, researchers from Google Brain published a paper showing how neural networks can learn symmetric encryption to protect information from other AI attackers. 
 
 cs: 0
 ai: 1
