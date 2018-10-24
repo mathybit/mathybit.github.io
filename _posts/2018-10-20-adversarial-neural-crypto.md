@@ -50,7 +50,7 @@ To implement this scenario, we build 3 neural networks:
 * Bob is the decryption algorithm
 * Eve is the attacker
 
-To implement this in Keras, we need the following imports:
+We will need the following imports for our Keras implementation:
 
 {% highlight python %}
 from keras import backend as K
@@ -246,8 +246,6 @@ while epoch < n_epochs:
             evemodel.train_on_batch([m_batch, k_batch], None)
     
     epoch += 1
-	
-print('Training finished.')
 {% endhighlight %}
 
 
@@ -263,7 +261,7 @@ During training, we kept track of not only the `abeloss` and `eveloss` values, b
 | *Figure 2: Loss values during training* |
 {:class="table-center" width="80%"}
 
-Initially, all 3 loss values start at 8, which means neither Eve nor Bob do any better than random guessing. Eve's loss decreases faster up to a point, after which Alice is able to learn an encryption scheme which Bob is able to decrypt, but which Eve can no longer decipher. Notice that Eve's loss doesn't climb back up to 8, so Eve still does slightly better than random guessing.
+Initially, all three loss values start at 8, which means neither Eve nor Bob do any better than random guessing. Eve's loss decreases faster up to a point, after which Alice is able to learn an encryption scheme which Bob can understand, but which fools Eve. Notice that Eve's loss doesn't climb back up to 8, so Eve still does slightly better than random guessing.
 
 We evaluated Bob and Eve on 10,000 random messages (encrypted with randomly selected keys), and found the following:
 
@@ -279,11 +277,11 @@ It's important to realize that Eve still performs better than random guessing. F
 P(\text{1 bit correct}) = \frac{1}{2}
 \$$
 
-chance of guessing that bit correctly. Under the assumption of independent bits in the ciphertext, the probability of guessing the entire message correctly would be
+chance of guessing that bit correctly. Under the assumption of independent guesses for each ciphertext bit, the probability of guessing the entire message correctly would be
 \$$
 P(\text{all bits correct}) = \pr{\frac{1}{2}}^{16} = 0.0015 \%
 \$$
-which is much worse than Eve's actual performance.
+which is significantly worse than Eve's actual performance.
 
 It is interesting to analyze the performance of Eve when keeping Alice-Bob frozen. *Figure 3* shows two such scenarios:
 
@@ -292,7 +290,7 @@ It is interesting to analyze the performance of Eve when keeping Alice-Bob froze
 | *Figure 3: Eve's performance for frozen A-B when starting untrained (left) or trained (right)* |
 {:class="table-center"}
 
-When starting with freshly initialized networks, and keeping Alice-Bob frozen, Eve is still able to gain a non-negligible advantage. She ends up with 3 incorrectly guessed bits on average. When evaluated on a sample of 10,000 ciphertexts, we get
+When starting with freshly initialized networks, and keeping Alice-Bob frozen, Eve is still able to gain a non-negligible advantage. She ends up with 3 incorrect bit guesses on average. When evaluated on a sample of 10,000 ciphertexts, we get
 
 {% highlight shell %}
 Bob % correct:  0.0 %
@@ -308,7 +306,7 @@ However, when keeping the trained version of Alice-Bob constant, we see that Eve
 
 ## AI-based encryption (PoC)
 
-We built and trained similar neural configuration on 8-bit messages/keys and 8-dimensional ciphertexts. Other than the bit size, we also added a dense layer after the sequence of Conv1D layers, and allowed the codings to be between $$-1$$ and $$1$$ by using the $$tanh()$$ activation function at output. *Figure 4* shows the training loss of our setup.
+We built and trained similar neural configuration on 8-bit messages/keys and 8-dimensional ciphertexts. Other than the bit size, we also added a dense layer after the sequence of 1D convolutions, and allowed the codings to be between $$-1$$ and $$1$$ by using the $$tanh()$$ activation function at output. *Figure 4* shows the training loss of our setup.
 
 | ![crypto2-2k.png](../assets/img/crypto2-2k.png){:width="50%" class="image-right"} ![crypto2-all.png](../assets/img/crypto2-all.png){:width="50%"} |
 |:--:|
@@ -337,7 +335,7 @@ but its ciphertext encoding is much, much worse. Mapped to human-readable output
 ?pfx?bhj?t,z!!ma!nhr:exs!qlt,apl:id?.j..?eu??lzr?yjg:lfo!bun?j?l?qfl?uuo?usb!ztg?uqh:mte?vuq? j 
 {% endhighlight %}
 
-Bob is able to successfully decode the binary ciphertext, while Eve's code-breaking attempt results in:
+Bob is able to successfully decode the binary ciphertext, while Eve's code-breaking attempt gave:
 {% highlight shell %}
 !??
 {% endhighlight %}
