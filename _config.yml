@@ -33,18 +33,19 @@ email: writetoadriano@gmail.com
 #discus-identifier: # Add your Disqus identifier
 
 
-# Paginate
-#
-paginate: 5
-paginate_path: /page:num/
-
-
 # Build settings
+#
 markdown: kramdown
-gems:
+plugins:
   - jekyll-feed
   - jekyll-paginate
 exclude:
   - Gemfile
   - Gemfile.lock
 include: [_pages]
+
+
+# Paginate settings
+#
+paginate: 5
+paginate_path: /page:num/
