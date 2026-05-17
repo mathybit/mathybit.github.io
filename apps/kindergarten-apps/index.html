@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kid Apps</title>
+  <style>
+    body { margin:0; font-family:Arial, sans-serif; }
+    .container { display:flex; height:100vh; }
+    nav { width:200px; background:#222; padding:10px; box-sizing:border-box; color:#fff; }
+    nav a { display:block; margin-bottom:6px; text-decoration:none; color:#fff; padding:8px 12px; border-radius:4px; }
+    nav a:hover { background:#444; }
+    nav a.active { background:#fff; color:#222; }
+    main { flex:1; }
+    iframe { width:100%; height:100%; border:none; background:#fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="addition-grid/app.html" target="appFrame" class="gameOption active">Addition Grid</a>
+      <a href="subtraction-grid/app.html" target="appFrame" class="gameOption">Subtraction Grid</a>
+      <a href="number-ordering/app.html" target="appFrame" class="gameOption">Number Ordering</a>
+      <a href="color-mixing/app.html" target="appFrame" class="gameOption">Color Mixer</a>
+    </nav>
+    <main>
+      <iframe name="appFrame" src="addition-grid/app.html"></iframe>
+    </main>
+  </div>
+
+  <script>
+// Set active immediately on link click
+document.querySelectorAll('nav a.gameOption').forEach(a => {
+    a.addEventListener('click', () => {
+    document.querySelectorAll('nav a').forEach(b => b.classList.remove('active'));
+    a.classList.add('active');
+    });
+});
+  </script>
+</body>
+</html>

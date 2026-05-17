@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Order Interactive</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {color:#333;}
+    #config, #orderConfig, #repeatConfig {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    #config label, #orderConfig label, #repeatConfig label {
+      margin-right: 0.5rem;
+    }
+    #config input{
+      width: 4rem;
+      margin-right: 1rem;
+      padding: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+      #orderConfig {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    #generateBtn {
+      margin-top: 1rem;
+      padding: 8px 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #generateBtn:hover {background: #218838;}
+    #initialList, #orderedList {
+      margin-top: 1rem;
+      font-size: 1.5rem;
+    }
+    .number {
+      display: inline-block;
+      margin: 0 0.3rem;
+      padding: 0.2rem 0.4rem;
+      background: #e0e0e0;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .number.incorrect {
+      background: #ffcccc;
+      animation: flicker 0.5s;
+    }
+    @keyframes flicker {
+      0% {background: #ffcccc;}
+      50% {background: #ff9999;}
+      100% {background: #ffcccc;}
+    }
+    #doneMsg {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: green;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Number Order Game</h1>
+  <div id="config">
+    <label>Count: <input type="number" id="countInput" min="1" value="5" step="1" /></label>
+    <label>Max Value: <input type="number" id="maxInput" min="10" value="20" step="10" /></label>
+  </div>
+  <div id="orderConfig" style="margin-top:1rem;">
+     <label style="display:block; margin-bottom:0.3rem;"><input type="radio" name="order" value="asc" checked /> Lowest to Highest</label>
+     <label style="display:block; margin-bottom:0.3rem;"><input type="radio" name="order" value="desc" /> Highest to Lowest</label>
+  </div>
+  <div id="repeatConfig" style="margin-top:0.5rem;">
+    <label><input type="checkbox" id="allowRepeats" /> Allow repeats</label>
+  </div>
+  <div id="soundConfig" style="margin-top:0.5rem;">
+     <label><input type="checkbox" id="enableSounds" checked /> Enable audio</label>
+  </div>
+  <button id="generateBtn">Generate Numbers</button>
+  <div id="initialList"></div>
+  <div id="orderedList"></div>
+  <div id="doneMsg"></div>
+
+  <script>
+    const generateBtn = document.getElementById('generateBtn');
+    const initialListDiv = document.getElementById('initialList');
+    const orderedListDiv = document.getElementById('orderedList');
+    const doneMsgDiv = document.getElementById('doneMsg');
+
+    let remaining = [];
+    let ordered = [];
+    let sorted = [];
+
+    // Simple Web Audio feedback
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+      const enableSounds = document.getElementById('enableSounds');
+      if (!enableSounds || !enableSounds.checked) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      if (type === 'correct') {
+        // sweep from 400 to 800 Hz
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(700, audioCtx.currentTime + 0.2);
+        gain.gain.value = 0.13;
+      } else if (type === 'incorrect') {
+        // sweep from 200 to 400 Hz
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+        gain.gain.value = 0.15;
+      }
+      osc.start();
+      setTimeout(() => osc.stop(), 200);
+    }
+
+    function generateNumbers() {
+      const count = parseInt(document.getElementById('countInput').value, 10) || 3;
+      const maxVal = parseInt(document.getElementById('maxInput').value, 10) || 20;
+      const allowRepeats = document.getElementById('allowRepeats').checked;
+      const order = document.querySelector('input[name="order"]:checked').value;
+
+      if (!allowRepeats && count > maxVal) {
+        alert('Count cannot exceed max value for unique numbers.');
+        return;
+      }
+
+      remaining = [];
+      ordered = [];
+      if (allowRepeats) {
+        for (let i = 0; i < count; i++) {
+          remaining.push(Math.floor(Math.random() * maxVal) + 1);
+        }
+      } else {
+        const used = new Set();
+        while (remaining.length < count) {
+          const num = Math.floor(Math.random() * maxVal) + 1;
+          if (!used.has(num)) {
+            used.add(num);
+            remaining.push(num);
+          }
+        }
+      }
+
+      sorted = [...remaining].sort((a, b) => order === 'asc' ? a - b : b - a);
+      renderLists();
+      doneMsgDiv.textContent = '';
+    }
+
+    function renderLists() {
+      initialListDiv.innerHTML = '';
+      remaining.forEach((num, idx) => {
+        const span = document.createElement('span');
+        span.textContent = num;
+        span.className = 'number';
+        span.dataset.index = idx;
+        span.addEventListener('click', () => handleClick(idx));
+        initialListDiv.appendChild(span);
+      });
+
+      orderedListDiv.innerHTML = '';
+      ordered.forEach(num => {
+        const span = document.createElement('span');
+        span.textContent = num;
+        span.className = 'number';
+        orderedListDiv.appendChild(span);
+      });
+    }
+
+    function handleClick(idx) {
+      const num = remaining[idx];
+      const expected = sorted[ordered.length];
+      if (num === expected) {
+        // correct
+        ordered.push(num);
+        remaining.splice(idx, 1);
+        renderLists();
+        if (ordered.length === sorted.length) {
+          doneMsgDiv.textContent = 'Done!';
+        }
+        playSound('correct');
+      } else {
+        // incorrect: highlight red and flicker
+        const span = initialListDiv.children[idx];
+        span.classList.add('incorrect');
+        setTimeout(() => span.classList.remove('incorrect'), 500);
+        playSound('incorrect');
+      }
+    }
+
+    generateBtn.addEventListener('click', generateNumbers);
+  </script>
+</body>
+</html>

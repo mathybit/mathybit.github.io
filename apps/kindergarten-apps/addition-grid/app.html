@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Addition Grid Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {color:#333;}
+    #config {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    #config label {
+      margin-right: 0.5rem;
+    }
+    #config input[type=number] {
+      width: 4rem;
+      margin-right: 1rem;
+      padding: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #generateBtn {
+      margin-top: 1rem;
+      padding: 8px 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #generateBtn:hover {background: #218838;}
+    #grid {
+      margin-top: 1rem;
+      border-collapse: collapse;
+    }
+    #grid td, #grid th {
+      border: 1px solid #999;
+      padding: 0.5rem;
+      text-align: center;
+      width: 2rem;
+      height: 2rem;
+    }
+    #info {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: rgb(7, 51, 7);
+      font-size: 1.5rem;
+    }
+    .diag {
+      background: #d1e7dd;
+    }
+    .highlight {
+      background: #ffeeba;
+    }
+    .rowHighlight {
+      background: #d1e7dd;
+    }
+    .colHighlight {
+      background: #d1e7dd;
+    }
+    .clicked {
+      font-weight: bold;
+      background: #ffd700;
+    }
+    th {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Addition Grid Game</h1>
+  <div id="config">
+    <label>Grid size: <input type="number" id="gridSize" min="1" value="10" step="1" /></label>
+    <!-- Start indices at 0 removed; indices always start at 1 -->
+  </div>
+  <button id="generateBtn">Generate Grid</button>
+  <table id="grid"></table>
+  <div id="info" style="margin-top:1rem; font-weight:bold;"></div>
+
+  <script>
+const gridSizeInput = document.getElementById('gridSize');
+// const startZeroCheckbox = document.getElementById('startZero');
+const generateBtn = document.getElementById('generateBtn');
+const gridTable = document.getElementById('grid');
+
+let currentHighlight = null;
+
+
+function highlightSum(targetSum) {
+    // Remove previous highlight
+    if (currentHighlight !== null) {
+    const prev = gridTable.querySelectorAll('.highlight');
+    prev.forEach(el => el.classList.remove('highlight'));
+    }
+    // Highlight all cells with matching sum
+    const cells = gridTable.querySelectorAll(`td[data-sum="${targetSum}"]`);
+    cells.forEach(el => el.classList.add('highlight'));
+    // Highlight matching header cells
+    const headerCells = gridTable.querySelectorAll('th');
+    headerCells.forEach(el => {
+    if (el.textContent == targetSum) {
+        el.classList.add('highlight');
+    }
+    });
+    currentHighlight = targetSum;
+}
+
+function highlightCell(row, col, sum) {
+    // First highlight sum cells
+    highlightSum(sum);
+    
+    // Then highlight row and column
+    // Remove previous row/col highlights
+    const prevRow = gridTable.querySelectorAll('.rowHighlight');
+    prevRow.forEach(el => el.classList.remove('rowHighlight'));
+    const prevCol = gridTable.querySelectorAll('.colHighlight');
+    prevCol.forEach(el => el.classList.remove('colHighlight'));
+    
+    // Highlight row header and cells up to the clicked column
+    const rowHeader = gridTable.querySelector(`th[data-row="${row}"]`);
+    if (rowHeader) rowHeader.classList.add('rowHighlight');
+    const rowCells = gridTable.querySelectorAll(`td[data-row="${row}"]`);
+    rowCells.forEach(el => {
+        if (parseInt(el.dataset.col, 10) <= col) {
+            el.classList.add('rowHighlight');
+        }
+    });
+    
+    // Highlight column header and cells up to the clicked row
+    const colHeader = gridTable.querySelector(`th[data-col="${col}"]`);
+    if (colHeader) colHeader.classList.add('colHighlight');
+    const colCells = gridTable.querySelectorAll(`td[data-col="${col}"]`);
+    colCells.forEach(el => {
+        if (parseInt(el.dataset.row, 10) <= row) {
+        el.classList.add('colHighlight');
+        }
+    });
+    
+    // Remove any previously bolded cell
+    const prevClicked = gridTable.querySelector('.clicked');
+    if (prevClicked) prevClicked.classList.remove('clicked');
+    
+    // Highlight the clicked cell
+    const clickedCell = gridTable.querySelector(`td[data-row="${row}"][data-col="${col}"]`);
+    if (clickedCell) clickedCell.classList.add('clicked');
+    
+    // Display info text
+    const infoDiv = document.getElementById('info');
+    infoDiv.textContent = `${sum} = ${row} + ${col}`;
+}
+
+// Header click handlers
+function highlightRowHeader(row) {
+    // Clear previous highlights
+    const prevRow = gridTable.querySelectorAll('.rowHighlight');
+    prevRow.forEach(el => el.classList.remove('rowHighlight'));
+    const prevCol = gridTable.querySelectorAll('.colHighlight');
+    prevCol.forEach(el => el.classList.remove('colHighlight'));
+    const prevClicked = gridTable.querySelector('.clicked');
+    if (prevClicked) prevClicked.classList.remove('clicked');
+    
+    // Highlight the row header
+    const rowHeader = gridTable.querySelector(`th[data-row="${row}"]`);
+    if (rowHeader) rowHeader.classList.add('rowHighlight');
+    
+    // Clear previous diagonal highlight and highlight new one
+    highlightSum(row);
+    // Show info
+    const infoDiv = document.getElementById('info');
+    infoDiv.textContent = `${row} = ${row} + 0`;
+}
+
+function highlightColHeader(col) {
+    const prevRow = gridTable.querySelectorAll('.rowHighlight');
+    prevRow.forEach(el => el.classList.remove('rowHighlight'));
+    const prevCol = gridTable.querySelectorAll('.colHighlight');
+    prevCol.forEach(el => el.classList.remove('colHighlight'));
+    const prevClicked = gridTable.querySelector('.clicked');
+    if (prevClicked) prevClicked.classList.remove('clicked');
+    
+    const colHeader = gridTable.querySelector(`th[data-col="${col}"]`);
+    if (colHeader) colHeader.classList.add('colHighlight');
+    
+    // Clear previous diagonal highlight and highlight new one
+    highlightSum(col);
+    const infoDiv = document.getElementById('info');
+    infoDiv.textContent = `${col} = 0 + ${col}`;
+}
+
+function generateGrid() {
+    const size = parseInt(gridSizeInput.value, 10) || 10;
+    const startZero = false; // always start at 1
+    gridTable.innerHTML = '';
+
+    // Build header row with 0 in top-left
+    const headerRow = document.createElement('tr');
+    const corner = document.createElement('th');
+    corner.textContent = '0';
+    corner.addEventListener('click', () => {
+        highlightColHeader(0);
+        const infoDiv = document.getElementById('info');
+        infoDiv.textContent = '0 = 0 + 0';
+    });
+    headerRow.appendChild(corner);
+
+    for (let col = 1; col <= size; col++) {
+        const th = document.createElement('th');
+        th.textContent = col;
+        th.dataset.col = col;
+        th.addEventListener('click', () => highlightColHeader(col));
+        headerRow.appendChild(th);
+    }
+    gridTable.appendChild(headerRow);
+
+    for (let row = 1; row <= size; row++) {
+        const tr = document.createElement('tr');
+        const rowHeader = document.createElement('th');
+        rowHeader.textContent = row;
+        rowHeader.dataset.row = row;
+        rowHeader.addEventListener('click', () => highlightRowHeader(row));
+        tr.appendChild(rowHeader);
+        for (let col = 1; col <= size; col++) {
+            const td = document.createElement('td');
+            const sum = (startZero ? (row - 1) : row) + (startZero ? (col - 1) : col);
+            td.textContent = sum;
+            // Store row and column for later highlighting
+            td.dataset.row = row;
+            td.dataset.col = col;
+            td.dataset.sum = sum;
+            td.addEventListener('click', () => highlightCell(row, col, sum));
+            tr.appendChild(td);
+        }
+        gridTable.appendChild(tr);
+    }
+}
+
+generateBtn.addEventListener('click', generateGrid);
+
+  </script>
+</body>
+</html>

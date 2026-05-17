@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Mixer</title>
+    <style>
+        :root {
+            --bg-color: #f9f2f2;
+            --text-color: #333;
+            --border-color: #ccc;
+            --shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            /*justify-content: center;*/
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {color:#333; margin-bottom: 50px;}
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        #clear-btn, #algo-selector {
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        #clear-btn {
+            padding: 12px 24px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+        }
+
+        #clear-btn:active {
+            transform: scale(0.95);
+        }
+
+        #clear-btn:hover {
+            background-color: #ee5253;
+        }
+
+        #algo-selector {
+            padding: 10px 16px;
+            margin-right: 25px;
+            background-color: #fff;
+            color: #333;
+            border: 3px solid #ccc;
+            font-size: 1.1rem;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        #result-square {
+            width: 360px;
+            height: 360px;
+            border: 8px solid #333;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            transition: background-color 0.3s ease;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        #result-square .info-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            border-radius: 10px;
+        }
+
+        /*#result-square:hover .info-overlay {
+            opacity: 0.1;
+        }*/
+
+        #square-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 0 3px white, 0 0 3px white;
+        }
+
+        .color-rows {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .color-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .color-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .color-circle:hover {
+            transform: scale(1.2);
+            border-color: #333;
+        }
+
+        .color-name {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .count {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #333;
+            text-shadow: 0 0 3px white, 0 0 3px white;
+            pointer-events: none;
+            display: none;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .color-circle:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Color Mixer</h1>
+    <div class="main-container">
+        <div id="result-square">
+            <span id="square-text">No colours added</span>
+            <div id="square-overlay" class="info-overlay"></div>
+        </div>
+
+        <div class="color-rows">
+            <div class="color-row" id="row-rainbow">
+                <!-- ROYGBIV circles -->
+            </div>
+            <div class="color-row" id="row-extra">
+                <!-- White and Black circles -->
+            </div>
+
+            <div class="controls">
+                <select id="algo-selector">
+                    <option value="MIXBOX_OFFICIAL" selected>Mixbox official (CC BY-NC 4.0)</option>
+                    <option value="MIXBOX_APPROX">Mixbox-style approximation (Pigment)</option>
+                    <option value="RYB">RYB (Artist Paint / RYB)</option>
+                    <option value="CIELAB">CIELAB (Perceptual)</option>
+                    <option value="RGB">RGB (Additive)</option>
+                </select>
+                <button id="clear-btn">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    Mixbox color mixing library
+    © Secret Weapons
+    License: CC BY-NC 4.0
+    https://scrtwpns.com/mixbox/
+    <script src="https://scrtwpns.com/mixbox.js"></script>
+    -->
+    <script src="./lib/mixbox.js"></script>
+    <script>
+        const rainbowColors = [
+            { name: 'Red', hex: '#FF0000' },
+            { name: 'Orange', hex: '#FFA500' },
+            { name: 'Yellow', hex: '#FFFF00' },
+            { name: 'Green', hex: '#008000' },
+            { name: 'Blue', hex: '#0000FF' },
+            { name: 'Indigo', hex: '#4B0082' },
+            { name: 'Violet', hex: '#EE82EE' }
+        ];//.map(c => ({...c, hex: c.hex.startsWith('#') ? c.hex : '#' + c.hex}));
+
+        const extraColors = [
+            { name: 'White', hex: '#FFFFFF' },
+            { name: 'Black', hex: '#000000' }
+        ];
+
+        let addedColors = {};
+        let currentAlgorithm = 'MIXBOX_OFFICIAL';
+
+        const resultSquare = document.getElementById('result-square');
+        const squareText = document.getElementById('square-text');
+        const squareOverlay = document.getElementById('square-overlay');
+        const algoSelector = document.getElementById('algo-selector');
+        const clearBtn = document.getElementById('clear-btn');
+        const rainbowRow = document.getElementById('row-rainbow');
+        const extraRow = document.getElementById('row-extra');
+        
+        // Conversion functions between RGB - Hex, XYZ, CIELAB
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return { r, g, b };
+        }
+
+        function rgbToHex(r, g, b) {
+            const toHex = (n) => clamp255(Math.round(n)).toString(16).padStart(2, '0');
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+        }
+
+        function rgbToXyz(rgb) {
+            let r = rgb.r / 255, g = rgb.g / 255, b = rgb.b / 255;
+            r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+            g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+            b = b > 0.04045 ? Math.min(1, Math.pow((b + 0.055) / 1.055, 2.4)) : b / 12.92;
+            return {
+                x: (r * 0.4124 + g * 0.3576 + b * 0.1805) * 100,
+                y: (r * 0.2126 + g * 0.7152 + b * 0.0722) * 100,
+                z: (r * 0.0193 + g * 0.1192 + b * 0.9505) * 100
+            };
+        }
+
+        function xyzToRgb(xyz) {
+            let x = xyz.x / 100, y = xyz.y / 100, z = xyz.z / 100;
+            let r = x * 3.2406 + y * -1.5372 + z * -0.4986;
+            let g = x * -0.9689 + y * 1.8758 + z * 0.0415;
+            let b = x * 0.0557 + y * -0.2040 + z * 1.0570;
+            const compand = (v) => {
+                v = Math.max(0, Math.min(1, v));
+                return v <= 0.0031308
+                    ? 12.92 * v * 255
+                    : (1.055 * Math.pow(v, 1 / 2.4) - 0.055) * 255;
+            };
+            return {
+                r: compand(r),
+                g: compand(g),
+                b: compand(b)
+            };
+        }
+
+        function xyzToLab(xyz) {
+            let x = xyz.x / 95.047;
+            let y = xyz.y / 100.000;
+            let z = xyz.z / 108.883;
+            const f = (t) =>
+                t > 0.008856 ? Math.pow(t, 1 / 3) : 7.787 * t + 16 / 116;
+            const fx = f(x), fy = f(y), fz = f(z);
+            return {
+                l: 116 * fy - 16,
+                a: 500 * (fx - fy),
+                b: 200 * (fy - fz)
+            };
+        }
+
+        function labToXyz(lab) {
+            let fy = (lab.l + 16) / 116;
+            let fx = lab.a / 500 + fy;
+            let fz = fy - lab.b / 200;
+            const fInv = (t) =>
+                Math.pow(t, 3) > 0.008856
+                    ? Math.pow(t, 3)
+                    : (t - 16 / 116) / 7.787;
+            return {
+                x: fInv(fx) * 95.047,
+                y: fInv(fy) * 100.000,
+                z: fInv(fz) * 108.883
+            };
+        }
+
+
+
+        function clamp01(v) {
+            return Math.max(0, Math.min(1, v));
+        }
+
+        function clamp255(v) {
+            return Math.max(0, Math.min(255, v));
+        }
+
+        function rgbDistanceSq(a, b) {
+            const dr = a.r - b.r;
+            const dg = a.g - b.g;
+            const db = a.b - b.b;
+            return dr * dr + dg * dg + db * db;
+        }
+
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        function lerpRgb(c1, c2, t) {
+            return {
+                r: lerp(c1.r, c2.r, t),
+                g: lerp(c1.g, c2.g, t),
+                b: lerp(c1.b, c2.b, t)
+            };
+        }
+
+        /*
+         * RYB artist-color model.
+         *
+         * RYB -> RGB uses a trilinear interpolation cube. The cube corners are
+         * chosen so that the classic school/paint expectations hold:
+         *   red + yellow -> orange
+         *   yellow + blue -> green
+         *   red + blue -> violet/purple
+         *
+         * RGB -> RYB is not a simple closed-form transform, so this uses a small
+         * numerical inverse: find the RYB point whose RYB->RGB color is closest.
+         * For this app, with only a few selected colors, this is easily fast enough.
+         */
+        const RYB_TO_RGB_CUBE = {
+            // keys are `${r}${y}${b}`, where each component is 0 or 1
+            '000': { r: 255, g: 255, b: 255 }, // white / no pigment
+            '100': { r: 255, g:   0, b:   0 }, // red
+            '010': { r: 255, g: 255, b:   0 }, // yellow
+            '001': { r:   0, g:   0, b: 255 }, // blue
+            '110': { r: 255, g: 128, b:   0 }, // red + yellow = orange
+            '101': { r: 128, g:   0, b: 128 }, // red + blue = purple
+            '011': { r:   0, g: 128, b:   0 }, // yellow + blue = green
+            '111': { r:   0, g:   0, b:   0 }  // all pigments = black
+        };
+
+        function rybToRgb(ryb) {
+            const r = clamp01(ryb.r);
+            const y = clamp01(ryb.y);
+            const b = clamp01(ryb.b);
+
+            const c000 = RYB_TO_RGB_CUBE['000'];
+            const c100 = RYB_TO_RGB_CUBE['100'];
+            const c010 = RYB_TO_RGB_CUBE['010'];
+            const c001 = RYB_TO_RGB_CUBE['001'];
+            const c110 = RYB_TO_RGB_CUBE['110'];
+            const c101 = RYB_TO_RGB_CUBE['101'];
+            const c011 = RYB_TO_RGB_CUBE['011'];
+            const c111 = RYB_TO_RGB_CUBE['111'];
+
+            const x00 = lerpRgb(c000, c100, r);
+            const x10 = lerpRgb(c010, c110, r);
+            const x01 = lerpRgb(c001, c101, r);
+            const x11 = lerpRgb(c011, c111, r);
+
+            const xy0 = lerpRgb(x00, x10, y);
+            const xy1 = lerpRgb(x01, x11, y);
+
+            return lerpRgb(xy0, xy1, b);
+        }
+
+        const rgbToRybCache = new Map();
+
+        function rgbToRyb(rgb) {
+            const key = `${Math.round(rgb.r)},${Math.round(rgb.g)},${Math.round(rgb.b)}`;
+            if (rgbToRybCache.has(key)) return rgbToRybCache.get(key);
+
+            let best = { r: 0, y: 0, b: 0 };
+            let bestDist = Infinity;
+
+            // Coarse search.
+            const coarseSteps = 12;
+            for (let ri = 0; ri <= coarseSteps; ri++) {
+                for (let yi = 0; yi <= coarseSteps; yi++) {
+                    for (let bi = 0; bi <= coarseSteps; bi++) {
+                        const candidate = {
+                            r: ri / coarseSteps,
+                            y: yi / coarseSteps,
+                            b: bi / coarseSteps
+                        };
+                        const dist = rgbDistanceSq(rybToRgb(candidate), rgb);
+                        if (dist < bestDist) {
+                            bestDist = dist;
+                            best = candidate;
+                        }
+                    }
+                }
+            }
+
+            // Coordinate-descent refinement.
+            let step = 1 / coarseSteps;
+            for (let iter = 0; iter < 28; iter++) {
+                let improved = false;
+                const candidates = [
+                    best,
+                    { r: best.r + step, y: best.y,        b: best.b },
+                    { r: best.r - step, y: best.y,        b: best.b },
+                    { r: best.r,        y: best.y + step, b: best.b },
+                    { r: best.r,        y: best.y - step, b: best.b },
+                    { r: best.r,        y: best.y,        b: best.b + step },
+                    { r: best.r,        y: best.y,        b: best.b - step }
+                ];
+
+                for (const c of candidates) {
+                    const candidate = {
+                        r: clamp01(c.r),
+                        y: clamp01(c.y),
+                        b: clamp01(c.b)
+                    };
+                    const dist = rgbDistanceSq(rybToRgb(candidate), rgb);
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        best = candidate;
+                        improved = true;
+                    }
+                }
+
+                if (!improved) step *= 0.55;
+            }
+
+            rgbToRybCache.set(key, best);
+            return best;
+        }
+
+        function mixRYB(keys) {
+            let totalWeight = 0;
+            let sumR = 0, sumY = 0, sumB = 0;
+
+            for (const hex of keys) {
+                const weight = addedColors[hex];
+                const ryb = rgbToRyb(hexToRgb(hex));
+                sumR += ryb.r * weight;
+                sumY += ryb.y * weight;
+                sumB += ryb.b * weight;
+                totalWeight += weight;
+            }
+
+            return rybToRgb({
+                r: sumR / totalWeight,
+                y: sumY / totalWeight,
+                b: sumB / totalWeight
+            });
+        }
+
+        /*
+         * Mixbox-style pigment mixing approximation.
+         *
+         * The real Mixbox library uses a Kubelka-Munk pigment model with a learned
+         * RGB <-> pigment latent transform. That implementation is not reproduced
+         * here. This standalone approximation keeps the same broad idea:
+         *   1. Convert display RGB into a paint-like latent space.
+         *   2. Mix latent pigment amounts, not display-light RGB values.
+         *   3. Convert back to display RGB.
+         *
+         * Compared with the plain RYB mode, this adds a Kubelka-Munk-inspired
+         * absorption/scattering darkening pass. It tends to look more like opaque
+         * pigment than simple artist-wheel interpolation, while staying tiny and
+         * dependency-free.
+         */
+        function reflectanceToKS(R) {
+            R = Math.max(0.0001, Math.min(0.9999, R));
+            return ((1 - R) * (1 - R)) / (2 * R);
+        }
+
+        function ksToReflectance(ks) {
+            return 1 + ks - Math.sqrt(ks * ks + 2 * ks);
+        }
+
+        function mixMixboxApproximation(keys) {
+            const rybRgb = mixRYB(keys);
+
+            // Kubelka-Munk-inspired channel absorption mix.
+            // We do this lightly, then blend it with the RYB latent result so that
+            // kid-expected paint primaries still behave intuitively.
+            let totalWeight = 0;
+            let sumKsR = 0, sumKsG = 0, sumKsB = 0;
+
+            for (const hex of keys) {
+                const weight = addedColors[hex];
+                const rgb = hexToRgb(hex);
+                const R = rgb.r / 255;
+                const G = rgb.g / 255;
+                const B = rgb.b / 255;
+
+                sumKsR += reflectanceToKS(R) * weight;
+                sumKsG += reflectanceToKS(G) * weight;
+                sumKsB += reflectanceToKS(B) * weight;
+                totalWeight += weight;
+            }
+
+            const kmRgb = {
+                r: ksToReflectance(sumKsR / totalWeight) * 255,
+                g: ksToReflectance(sumKsG / totalWeight) * 255,
+                b: ksToReflectance(sumKsB / totalWeight) * 255
+            };
+
+            // Pure channel-KM gets too dark with ideal RGB primaries. Real paints are
+            // not laser-perfect #FFFF00 and #0000FF, so use it as a shading influence.
+            const kmInfluence = 0.18;
+            return {
+                r: lerp(rybRgb.r, kmRgb.r, kmInfluence),
+                g: lerp(rybRgb.g, kmRgb.g, kmInfluence),
+                b: lerp(rybRgb.b, kmRgb.b, kmInfluence)
+            };
+        }
+
+
+        /*
+         * Official Mixbox integration.
+         *
+         * Uses Secret Weapons' Mixbox JavaScript build when the page can load:
+         *   https://scrtwpns.com/mixbox.js
+         *
+         * Mixbox 2.0 copyright (c) 2022 Secret Weapons.
+         * License: Creative Commons Attribution-NonCommercial 4.0.
+         * Authors: Sarka Sochorova and Ondrej Jamriska.
+         * Project: https://github.com/scrtwpns/mixbox
+         *
+         * This app uses Mixbox for personal / non-commercial use. If the external
+         * library cannot be loaded, the app falls back to the local approximation.
+         */
+        function rgbToCssString(rgb) {
+            return `rgb(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)})`;
+        }
+
+        function parseMixboxRgb(value) {
+            if (typeof value === 'string') {
+                const nums = value.match(/-?\d+(?:\.\d+)?/g);
+                if (nums && nums.length >= 3) {
+                    return {
+                        r: Number(nums[0]),
+                        g: Number(nums[1]),
+                        b: Number(nums[2])
+                    };
+                }
+            }
+
+            if (Array.isArray(value) && value.length >= 3) {
+                return {
+                    r: value[0] <= 1 ? value[0] * 255 : value[0],
+                    g: value[1] <= 1 ? value[1] * 255 : value[1],
+                    b: value[2] <= 1 ? value[2] * 255 : value[2]
+                };
+            }
+
+            if (value && typeof value === 'object' && 'r' in value && 'g' in value && 'b' in value) {
+                return {
+                    r: value.r <= 1 ? value.r * 255 : value.r,
+                    g: value.g <= 1 ? value.g * 255 : value.g,
+                    b: value.b <= 1 ? value.b * 255 : value.b
+                };
+            }
+
+            return null;
+        }
+
+        function mixMixboxOfficial(keys) {
+            if (typeof mixbox === 'undefined' ||
+                typeof mixbox.rgbToLatent !== 'function' ||
+                typeof mixbox.latentToRgb !== 'function' ||
+                typeof mixbox.LATENT_SIZE === 'undefined') {
+                console.warn('Official Mixbox library was not loaded. Falling back to Mixbox-style approximation.');
+                return mixMixboxApproximation(keys);
+            }
+
+            let totalWeight = 0;
+            const zMix = new Array(mixbox.LATENT_SIZE).fill(0);
+
+            for (const hex of keys) {
+                const weight = addedColors[hex];
+                const rgb = hexToRgb(hex);
+                const z = mixbox.rgbToLatent(rgbToCssString(rgb));
+
+                for (let i = 0; i < zMix.length; i++) {
+                    zMix[i] += z[i] * weight;
+                }
+                totalWeight += weight;
+            }
+
+            for (let i = 0; i < zMix.length; i++) {
+                zMix[i] /= totalWeight;
+            }
+
+            const mixed = mixbox.latentToRgb(zMix);
+            return parseMixboxRgb(mixed) || mixMixboxApproximation(keys);
+        }
+
+        function addColorToMix(hex) {
+            addedColors[hex] = (addedColors[hex] || 0) + 1;
+            updateMix();
+        }
+
+        function clearMix() {
+            addedColors = {};
+            updateMix();
+        }
+
+        function updateMix() {
+            let totalWeight = 0;
+            let sumR = 0;
+            let sumG = 0;
+            let sumB = 0;
+
+            const keys = Object.keys(addedColors);
+
+            // First, reset all counts and hide them
+            document.querySelectorAll('.color-circle').forEach(circle => {
+                const countSpan = circle.querySelector('.count');
+                if (countSpan) {
+                    countSpan.textContent = '0';
+                    countSpan.style.display = 'none';
+                }
+            });
+
+            if (keys.length == 0) {
+                squareText.textContent = "No colours added";
+                squareText.style.color = "black";
+                resultSquare.style.backgroundColor = "#fff";
+                squareOverlay.innerHTML = "";
+                return;
+            }
+
+            let finalR = 0, finalG = 0, finalB = 0;
+
+            if (currentAlgorithm == 'RGB') {
+                for (const hex of keys) {
+                    const weight = addedColors[hex];
+                    const rgb = hexToRgb(hex);
+                    finalR += rgb.r * weight;
+                    finalG += rgb.g * weight;
+                    finalB += rgb.b * weight;
+                    totalWeight += weight;
+                }
+                finalR /= totalWeight;
+                finalG /= totalWeight;
+                finalB /= totalWeight;
+                //resultSquare.style.backgroundColor = rgbToHex(finalR, finalG, finalB);
+            } else if (currentAlgorithm == 'CIELAB') {
+                let sumL = 0, sumA = 0, sumB = 0;
+                for (const hex of keys) {
+                    const weight = addedColors[hex];
+                    const lab = xyzToLab(rgbToXyz(hexToRgb(hex)));
+                    sumL += lab.l * weight;
+                    sumA += lab.a * weight;
+                    sumB += lab.b * weight;
+                    totalWeight += weight;
+                }
+                const avgL = sumL / totalWeight;
+                const avgA = sumA / totalWeight;
+                const avgB = sumB / totalWeight;
+                const xyz = labToXyz({ l: avgL, a: avgA, b: avgB });
+                const rgb = xyzToRgb(xyz);
+                finalR = rgb.r;
+                finalG = rgb.g;
+                finalB = rgb.b;
+                //resultSquare.style.backgroundColor = rgbToHex(rgb.r, rgb.g, rgb.b);
+            } else if (currentAlgorithm == 'RYB') {
+                const rgb = mixRYB(keys);
+                finalR = rgb.r;
+                finalG = rgb.g;
+                finalB = rgb.b;
+            } else if (currentAlgorithm == 'MIXBOX_APPROX') {
+                const rgb = mixMixboxApproximation(keys);
+                finalR = rgb.r;
+                finalG = rgb.g;
+                finalB = rgb.b;
+            } else if (currentAlgorithm == 'MIXBOX_OFFICIAL') {
+                const rgb = mixMixboxOfficial(keys);
+                finalR = rgb.r;
+                finalG = rgb.g;
+                finalB = rgb.b;
+            }
+
+            const finalHex = rgbToHex(finalR, finalG, finalB);
+            resultSquare.style.backgroundColor = finalHex;
+            //squareText.textContent = resultSquare.style.backgroundColor;
+            squareText.textContent = finalHex.toUpperCase();
+            squareOverlay.innerHTML = "";
+
+            // Now update the counts for the added colors
+            document.querySelectorAll('.color-circle').forEach(circle => {
+                const hex = circle.dataset.hex;
+                //const countSpan = circle.querySelector('.count');
+                const count = addedColors[hex] || 0;
+                if (count > 0) {
+                    const countSpan = circle.querySelector('.count');
+                    countSpan.textContent = count;
+                    countSpan.style.display = 'block';
+                }
+            });
+        }
+
+        function createColorButton(color) {
+            const container = document.createElement('div');
+            container.className = 'color-container';
+
+            const circle = document.createElement('div');
+            circle.className = 'color-circle';
+            circle.style.backgroundColor = color.hex;
+            circle.dataset.hex = color.hex;
+            circle.onclick = () => addColorToMix(color.hex);
+
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            const rgb = hexToRgb(color.hex);
+            //const rgbStr = `rgb(${rgb.r},${rgb.g},${rgb.b})`;
+            const rgbStr = `rgb(${Math.round(rgb.r)},${Math.round(rgb.g)},${Math.round(rgb.b)})`;
+            const hexStr = color.hex.toUpperCase();
+            tooltip.innerHTML = `${rgbStr}<br>${hexStr}`;
+
+            const nameLabel = document.createElement('div');
+            nameLabel.className = 'color-name';
+            nameLabel.textContent = color.name;
+
+            const countSpan = document.createElement('span');
+            countSpan.className = 'count';
+            countSpan.textContent = '0';
+
+            circle.appendChild(tooltip);
+            circle.appendChild(countSpan);
+            container.appendChild(circle);
+            container.appendChild(nameLabel);
+            return container;
+        }
+
+        function init() {
+            rainbowColors.forEach(color => {
+                rainbowRow.appendChild(createColorButton(color));
+            });
+            extraColors.forEach(color => {
+                extraRow.appendChild(createColorButton(color));
+            });
+            algoSelector.onchange = (e) => {
+                currentAlgorithm = e.target.value;
+                updateMix();
+            };
+            clearBtn.onclick = clearMix;
+        }
+
+        init();
+    </script>
+</body>
+</html>
