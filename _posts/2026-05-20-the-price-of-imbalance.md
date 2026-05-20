@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "The Price of Imbalance"
-date:   2026-05-20 00:05:00
+date:   2026-05-20 00:04:00
 img: imbalanced_classification_logo.png
 description: "When evaluating a machine learning model, most practitioners simply apply the standard precision/recall formulas to whatever test set they have. The results can be wildly "
 
