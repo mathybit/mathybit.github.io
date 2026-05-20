@@ -132,9 +132,7 @@ code,
 kbd,
 samp {
   font-family: monospace, monospace;
-  /* 1 */
-  font-size: 1em;
-  /* 2 */
+  font-size: 0.9em;
 }
 
 /**
@@ -781,7 +779,7 @@ blockquote {
   font-weight: 400;
   border: 1px solid #607D8B;
   border-radius: 3px;
-  padding: 0.1rem 0.5rem;
+  padding: 0.06rem 0.25rem;
 }
 
 pre {
@@ -963,6 +961,33 @@ table.table-center {
   /*display: block;*/
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Style for tables displaying various metrics, etc. */
+table.result-table {
+  border-collapse: collapse;
+  margin: 1rem auto;
+  border: 2px solid #8f7a7a;
+  font-size: 0.8rem;
+}
+table.result-table th {
+  border: 1px solid #917f7f; /* #796363 */
+  background-color: #ebdddd; /* #e7d6d6;*/
+  padding: 0.2rem 0.75rem;
+  text-align: center;
+}
+table.result-table td {
+  font-family: monospace, monospace;
+  border: 1px solid #917f7f; /* #796363 */
+  background-color: #e8e8e8; /* #e7dfdf;*/
+  padding: 0.1rem 0.3rem;
+  text-align: right;
+}
+table.result-table td.highlight-yellow {
+  background-color: rgba(252, 249, 208, 0.9); /* rgb(252, 249, 208); */
+}
+table.result-table td.highlight-green {
+  background-color: rgba(189, 250, 165, 0.9); /* rgb(252, 249, 208); */
 }
 
 .page-content {
