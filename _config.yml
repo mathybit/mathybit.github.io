@@ -9,7 +9,9 @@ permalink: ':title/'
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://mathybit.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 
-google-analytics: "UA-124634802-1"
+# Old measurement ID ID: UA-124634802-1
+# New measurement ID: G-QN7HX7PXVS
+google-analytics: "G-QN7HX7PXVS"
 textlogo: logo1.png
 
 
