@@ -232,7 +232,7 @@ The results from three separate runs reveal **dramatic distortion** in the compu
     <td class="highlight-yellow">0.9946</td>
     <td>0.9377</td>
     <td class="highlight-yellow">0.3582</td>
-    <td class="highlight-yellow">0.8727</td>
+    <td>0.8727</td>
   </tr>
   <tr>
     <td>Imbalanced run 2</td>
@@ -246,7 +246,7 @@ The results from three separate runs reveal **dramatic distortion** in the compu
     <td class="highlight-yellow">0.9900</td>
     <td>0.9462</td>
     <td class="highlight-yellow">0.4065</td>
-    <td class="highlight-yellow">0.7937</td>
+    <td>0.7937</td>
   </tr>
 </tbody>
 </table>

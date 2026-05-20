@@ -967,19 +967,19 @@ table.table-center {
 table.result-table {
   border-collapse: collapse;
   margin: 1rem auto;
-  border: 2px solid #8f7a7a;
+  border: 1px solid #8f7a7a;
   font-size: 0.8rem;
 }
 table.result-table th {
   border: 1px solid #917f7f; /* #796363 */
-  background-color: #ebdddd; /* #e7d6d6;*/
+  background-color: #d9caca; /* #ebdddd;*/
   padding: 0.2rem 0.75rem;
   text-align: center;
 }
 table.result-table td {
   font-family: monospace, monospace;
   border: 1px solid #917f7f; /* #796363 */
-  background-color: #e8e8e8; /* #e7dfdf;*/
+  background-color: #E4e1e1; /* #e8e8e8 */
   padding: 0.1rem 0.3rem;
   text-align: right;
 }
