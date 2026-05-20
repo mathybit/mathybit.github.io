@@ -104,7 +104,7 @@ Data generation uses a two-stage process to simulate a *daily event* pattern com
 
 We collect these daily episodes over a *two-week period* (`N_DAYS = 14`), forming the test set to be used for model performance evaluation.
 
-The full simulation code is available in the accompanying [Jupyter Notebook](https://github.com/mathybit/ml-tutorials/imbalanced_metrics_classification.ipynb){:target="_blank"} on GitHub.
+The full simulation code is available in the accompanying [Jupyter Notebook](https://github.com/mathybit/ml-tutorials/blob/master/imbalanced_metrics_classification.ipynb){:target="_blank"} on GitHub.
 
 
 ## Model Performance
@@ -302,7 +302,7 @@ The first approach operates directly on the confusion matrix:
 </tbody>
 </table>
 
- For each class, we scale the corresponding row by a factor that equalizes the row sums -- effectively reweighting each class to have the same number of examples as the majority class. The implementation looks like this (see [Jupyter Notebook](https://github.com/mathybit/ml-tutorials/imbalanced_metrics_classification.ipynb){:target="_blank"} for the complete code):
+ For each class, we scale the corresponding row by a factor that equalizes the row sums -- effectively reweighting each class to have the same number of examples as the majority class. The implementation looks like this (see [Jupyter Notebook](https://github.com/mathybit/ml-tutorials/blob/master/imbalanced_metrics_classification.ipynb){:target="_blank"} for the complete code):
 
 {% highlight python %}
 row_sums = cmatrix.sum(axis=1)
