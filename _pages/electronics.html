@@ -1,0 +1,16 @@
+---
+layout: page
+title: Electronics
+permalink: /electronics/
+---
+
+## Electronics
+<ul>
+{% for post in site.posts reversed %}
+	{% if post.electronics == 1 and post.publish == 1%}
+	<li>
+		<a href="{{ post.url | prepend: site.baseurl}}">{{ post.title }}</a>
+	</li>
+	{% endif %}
+{% endfor %}
+</ul>
